@@ -5,6 +5,7 @@ sys.path.append(dirname(dirname(realpath(__file__))))
 import threading
 import SimpleHTTPServer
 import SocketServer
+import socket
 
 from time import sleep
 
@@ -24,19 +25,28 @@ class RunRequests(threading.Thread):
         super(RunRequests, self).__init__()
 
     def shutdown(self):
+        soc = self.server.socket
+        soc.shutdown(socket.SHUT_RDWR)
+        soc.close()
         self.is_shutdown = True
 
     def run(self):
         Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-        server = SocketServer.TCPServer(('127.0.0.1', 8000), Handler)
+        self.server = SocketServer.TCPServer(('127.0.0.1', 8000), Handler)
 
         while not self.is_shutdown:
             sleep(self.delay)
             print "handling request"
-            server.handle_request()
+            try:
+                self.server.handle_request()
+            except Exception, e:
+                print e
+                print "Bailing from request handler"
+                return
+
             print "request finished"
 
-        print "Done Handling"
+        print "Done Handling Request"
 
 
 def run_server():
@@ -66,8 +76,8 @@ def run_proxy():
 
 
 def kill_proxy(proxy):
-    proxy.shutdown()
     print "Killing Proxy"
+    proxy.shutdown()
 
 
 def run_selenium():
@@ -92,7 +102,6 @@ def run_selenium():
         print e
         error = 1
     finally:
-        driver.get('http://127.0.0.1:8000/tests/test-pages/hello-world.html')
         driver.quit()
 
     return error
@@ -109,8 +118,9 @@ if __name__ == '__main__':
     except Exception, e:
         print e
     finally:
-
         kill_server(server)
         kill_proxy(proxy)
+
+    print "Done with test"
 
     exit(test_result)

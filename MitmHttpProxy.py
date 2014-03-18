@@ -100,6 +100,7 @@ class InjectionProxy(Thread):
 
         for soc in self.incomming:
             print "closing", soc
+            self.c = soc
             soc.shutdown(socket.SHUT_RDWR)
             soc.close()
             self.incomming.remove(soc)
@@ -140,6 +141,7 @@ class InjectionProxy(Thread):
     def run_injection(self, received):
         peer = self.c.getpeername()
         content = self.content
+        return content
 
         is_incomming = (peer[0], peer[1]) == \
             (self.outgoing_host, self.outgoing_port)
