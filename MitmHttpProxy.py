@@ -1,6 +1,7 @@
 import socket
 from time import sleep
 from select import select
+from threading import Thread
 
 
 class ForwardTo(object):
@@ -15,6 +16,7 @@ class ForwardTo(object):
     def start(self, hostname, port):
         try:
             self.con.connect((hostname, int(port)))
+            self.con.settimeout(5)
             return self.con
         except Exception, exc:
             print "Could Not Connect to", hostname, port
@@ -22,11 +24,11 @@ class ForwardTo(object):
             return False
 
 
-class InjectionProxy:
+class InjectionProxy(Thread):
 
     incomming = []
     channel = {}
-    shutdown = False
+    is_shutdown = False
 
     def __init__(self,
                  host, port,
@@ -55,18 +57,22 @@ class InjectionProxy:
         # make the socket accept connections, with max backlog
         self.con.listen(10)
 
-    def shutdown(self):
-        self.shutdown = True
+        super(InjectionProxy, self).__init__()
 
-    def run_loop(self):
+    def shutdown(self):
+        self.is_shutdown = True
+
+    def run(self):
         self.incomming.append(self.con)
-        while True:
+        while not self.is_shutdown:
             sleep(self.delay)
             print "running while 1"
 
             # each incoming gets its a new wlist and xlist
             rlist = self.incomming
-            rready, wready, xready = select(rlist, [], [])
+            print "selecting"
+            rready, wready, xready = select(rlist, [], [], 5)
+            print "done selecting", rready
             # for all the reading connections
             for self.c in rready:
                 print "in for rready"
@@ -92,6 +98,14 @@ class InjectionProxy:
                     self.run_recv(self.c)
                     pass
 
+        for soc in self.incomming:
+            print "closing", soc
+            soc.shutdown(socket.SHUT_RDWR)
+            soc.close()
+            self.incomming.remove(soc)
+
+        print "Done Closing", self.incomming, self.channel
+
     def run_accept(self):
         forward = ForwardTo().start(self.outgoing_host, self.outgoing_port)
         clientsock, clientaddr = self.con.accept()
@@ -102,6 +116,7 @@ class InjectionProxy:
             self.channel[forward] = clientsock
         else:
             print "Cannot connect to", clientaddr
+            clientsock.shutdown(socket.SHUT_RDWR)
             clientsock.close()
 
     def run_close(self):

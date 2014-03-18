@@ -6,6 +6,8 @@ import threading
 import SimpleHTTPServer
 import SocketServer
 
+from time import sleep
+
 from selenium import webdriver
 
 import MitmHttpProxy
@@ -14,27 +16,32 @@ global more_requests
 more_requests = True
 
 
-def keep_running():
-    global more_requests
-    print "keep running", more_requests
-    return more_requests
+class RunRequests(threading.Thread):
+    is_shutdown = False
+    delay = .01
 
+    def __init__(self):
+        super(RunRequests, self).__init__()
 
-class RunRequests:
-    def run_while_true(self):
+    def shutdown(self):
+        self.is_shutdown = True
+
+    def run(self):
         Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
         server = SocketServer.TCPServer(('127.0.0.1', 8000), Handler)
 
-        while keep_running():
+        while not self.is_shutdown:
+            sleep(self.delay)
+            print "handling request"
             server.handle_request()
+            print "request finished"
+
         print "Done Handling"
 
 
 def run_server():
     print "Starting server"
-    server = RunRequests()
-    thread = threading.Thread(target=server.run_while_true)
-    thread.deamon = True
+    thread = RunRequests()
     thread.start()
     print "Server running"
     return thread
@@ -42,9 +49,10 @@ def run_server():
 
 def kill_server(server):
     if server is None:
+        print "Server already down"
         return
-    print "Shuting down server"
-    print server.isAlive()
+    print "Shutting down server"
+    server.shutdown()
     print "Done shutting down server"
 
 
@@ -52,14 +60,13 @@ def run_proxy():
     ip = MitmHttpProxy.InjectionProxy(
         '127.0.0.1', 8877,
         '127.0.0.1', 8000)
-    thread = threading.Thread(target=ip.run_loop)
-    thread.deamon = True
-    thread.start()
+    ip.start()
     print "Running Proxy"
     return ip
 
 
 def kill_proxy(proxy):
+    proxy.shutdown()
     print "Killing Proxy"
 
 
