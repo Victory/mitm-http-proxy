@@ -25,14 +25,14 @@ class RunRequests(threading.Thread):
         super(RunRequests, self).__init__()
 
     def shutdown(self):
-        soc = self.server.socket
-        soc.shutdown(socket.SHUT_RDWR)
-        soc.close()
+        self.server.shutdown()
         self.is_shutdown = True
 
     def run(self):
         Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
         self.server = SocketServer.TCPServer(('127.0.0.1', 8000), Handler)
+        self.server.serve_forever()
+        return
 
         while not self.is_shutdown:
             sleep(self.delay)
@@ -46,6 +46,10 @@ class RunRequests(threading.Thread):
 
             print "request finished"
 
+        self.server.shutdown()
+        soc = self.server.socket
+        soc.shutdown(socket.SHUT_RDWR)
+        soc.close()
         print "Done Handling Request"
 
 
@@ -63,6 +67,7 @@ def kill_server(server):
         return
     print "Shutting down server"
     server.shutdown()
+    server.join(2)
     print "Done shutting down server"
 
 
@@ -78,7 +83,7 @@ def run_proxy():
 def kill_proxy(proxy):
     print "Killing Proxy"
     proxy.shutdown()
-
+    proxy.join(3)
 
 def run_selenium():
     proxy_addr = '127.0.0.1'

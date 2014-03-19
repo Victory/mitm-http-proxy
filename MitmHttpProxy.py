@@ -89,7 +89,7 @@ class InjectionProxy(Thread):
                 try:
                     self.content = self.c.recv(self.buffer_size)
                 except socket.error:
-                    break
+                    pass
 
                 # close if there is no data or continue to read
                 if len(self.content) == 0:
@@ -122,6 +122,8 @@ class InjectionProxy(Thread):
 
     def run_close(self):
         #remove objects from input_list
+        if not self.c in self.incomming:
+            return
         self.incomming.remove(self.c)
         self.incomming.remove(self.channel[self.c])
         out = self.channel[self.c]
@@ -141,12 +143,12 @@ class InjectionProxy(Thread):
     def run_injection(self, received):
         peer = self.c.getpeername()
         content = self.content
-        return content
 
         is_incomming = (peer[0], peer[1]) == \
             (self.outgoing_host, self.outgoing_port)
 
         if is_incomming:
+            print "injecting"
             content = content.replace(
                 '<body>',
                 '<body><p id="injected">injected</p>')
@@ -154,6 +156,13 @@ class InjectionProxy(Thread):
             replace = "GET http://" + \
             self.outgoing_host + ":" + str(self.outgoing_port)
             content = content.replace(replace, "GET ")
+
+        print "==============================start"
+        length = len(content.split("\r\n\r\n")[1])
+        content = content.replace(
+            'Content-Length: 107', 'Content-Length: ' + str(length))
+        print content
+        print "===============================end"
 
         return content
 
