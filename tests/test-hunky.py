@@ -17,7 +17,10 @@ if __name__ == '__main__':
     print "Done Joining"
     print "Opening"
 
-    #response = urlopen('http://127.0.0.1:8877')
-    #print "Reading..."
-    #response.read()
-    #print "Done reading"
+    response = urlopen('http://127.0.0.1:8877')
+    print "Reading..."
+    response.read()
+    print "Done reading"
+
+    print "Shutting Down"
+    cap.shutdown()

@@ -2,7 +2,7 @@ import socket
 from time import sleep
 from select import select
 from threading import Thread
-
+from urllib2 import urlopen
 
 class CollectAllProxy(Thread):
     into = []
@@ -38,6 +38,7 @@ class CollectAllProxy(Thread):
         # bind the socket
         self.incon.bind((self.inhost, self.inport))
         self.incon.listen(10)
+        return
 
 
         # outgoing socket (goes to http server)
@@ -65,7 +66,7 @@ class CollectAllProxy(Thread):
 
     def run(self):
         self.into.append(self.incon)
-        while 1:
+        while not self.is_shutdown:
             inrlist = self.into
             print "selecting", inrlist
 
@@ -80,18 +81,30 @@ class CollectAllProxy(Thread):
                     print "end accept"
                     print "recv from clientsocket"
                     content = clientsocket.recv(5)
-                    while 1:
-                        new_content = clientsocket.recv(5)
+                    new_content = True
+                    while not self.is_shutdown and new_content:
+                        print "client recv"
+                        print clientsocket
+                        rr, wr, xr = select([clientsocket], [], [], 5)
+                        try:
+                            new_content = rr[0].recv(5)
+                        except:
+                            self.into.shutdown()
+                            self.into.close()
+
+                        print "client end recv"
                         print new_content
                         if not new_content:
                             break
                         content += new_content
                     print content
-                    clientsocket.shutdown(socket.SHUT_RDWR)
+                    print "Closing"
+                    #clientsocket.shutdown(socket.SHUT_RDWR)
                     clientsocket.close()
                     print "done recv clientsocket"
                     break
 
+                continue
                 incomming_content = ''
                 cur_content = self.inc.recv(1024)
                 while cur_content:
