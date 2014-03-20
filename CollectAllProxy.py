@@ -19,6 +19,8 @@ class CollectAllProxy(Thread):
         self.outhost = outhost
         self.outport = outport
 
+        super(CollectAllProxy, self).__init__()
+
         # comes in locally
         self.incon = socket.socket(
             socket.AF_INET,
@@ -36,6 +38,7 @@ class CollectAllProxy(Thread):
         # bind the socket
         self.incon.bind((self.inhost, self.inport))
         self.incon.listen(10)
+
 
         # outgoing socket (goes to http server)
         self.outcon = socket.socket(
@@ -55,20 +58,42 @@ class CollectAllProxy(Thread):
         self.outcon.bind((self.outhost, self.outport))
         self.outcon.listen(10)
 
-        super(CollectAllProxy, self).__init__()
+
 
     def shutdown(self):
         self.is_shutdown = True
 
     def run(self):
+        self.into.append(self.incon)
         while 1:
             inrlist = self.into
-            print "selecting"
-            rready, wready, xready = select(inrlist, [], [], 5)
+            print "selecting", inrlist
+
+            rready, wready, xready = select(inrlist, [], [])
             print "done selecting"
             for self.inc in rready:
+                print "running rready"
+
+                if self.incon == self.inc:
+                    print "begin accept"
+                    (clientsocket, addr) = self.inc.accept()
+                    print "end accept"
+                    print "recv from clientsocket"
+                    content = clientsocket.recv(5)
+                    while 1:
+                        new_content = clientsocket.recv(5)
+                        print new_content
+                        if not new_content:
+                            break
+                        content += new_content
+                    print content
+                    clientsocket.shutdown(socket.SHUT_RDWR)
+                    clientsocket.close()
+                    print "done recv clientsocket"
+                    break
+
                 incomming_content = ''
-                cur_content = self.c.recv(1024)
+                cur_content = self.inc.recv(1024)
                 while cur_content:
                     print "cur content"
                     incomming_content += cur_content
