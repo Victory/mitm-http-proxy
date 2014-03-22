@@ -62,6 +62,7 @@ class CollectAllProxy(Thread):
 
 
     def shutdown(self):
+        self.incon.close()
         self.is_shutdown = True
 
     def run(self):
@@ -87,10 +88,13 @@ class CollectAllProxy(Thread):
                         print clientsocket
                         rr, wr, xr = select([clientsocket], [], [], 5)
                         try:
-                            new_content = rr[0].recv(5)
+                            new_content = rr[0].recv(5000)
                         except:
-                            self.into.shutdown()
-                            self.into.close()
+                            print "shutting down into"
+                            self.into[0].shutdown(socket.SHUT_RDWR)
+                            self.into[0].close()
+                            #self.inc.shutdown(socket.SHUT_RDWR)
+                            #self.inc.close()
 
                         print "client end recv"
                         print new_content
