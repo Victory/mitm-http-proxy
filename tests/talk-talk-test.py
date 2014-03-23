@@ -44,11 +44,6 @@ class Server(Thread):
             socket.SO_REUSEADDR,
             1)
 
-        self.server = socket.socket(
-            socket.AF_INET,
-            socket.SOCK_STREAM)
-
-        # bind the socket
         self.server.bind(('127.0.0.1', 8000))
         self.server.listen(5)
 
@@ -82,4 +77,3 @@ if __name__ == '__main__':
     s.start()
     send_with_netcat("None genuine without this seal!")
     shutdown_thread(s)
-    sleep(5)
