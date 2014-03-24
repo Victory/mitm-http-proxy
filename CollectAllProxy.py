@@ -1,8 +1,10 @@
 import socket
+import re
+
 from time import sleep
 from select import select
 from threading import Thread
-from urllib2 import urlopen
+
 
 class CollectAllProxy(Thread):
     into = []
@@ -21,7 +23,6 @@ class CollectAllProxy(Thread):
 
         super(CollectAllProxy, self).__init__()
 
-        # comes in locally
         self.incon = socket.socket(
             socket.AF_INET,
             socket.SOCK_STREAM)
@@ -31,47 +32,23 @@ class CollectAllProxy(Thread):
             socket.SO_REUSEADDR,
             1)
 
-        self.incon = socket.socket(
-            socket.AF_INET,
-            socket.SOCK_STREAM)
-
         # bind the socket
         self.incon.bind((self.inhost, self.inport))
         self.incon.listen(10)
-        return
-
-
-        # outgoing socket (goes to http server)
-        self.outcon = socket.socket(
-            socket.AF_INET,
-            socket.SOCK_STREAM)
-
-        self.outcon.setsockopt(
-            socket.SOL_SOCKET,
-            socket.SO_REUSEADDR,
-            1)
-
-        self.outcon = socket.socket(
-            socket.AF_INET,
-            socket.SOCK_STREAM)
-
-        # bind the socket
-        self.outcon.bind((self.outhost, self.outport))
-        self.outcon.listen(10)
-
-
 
     def shutdown(self):
+        print "shutting down"
         self.incon.close()
         self.is_shutdown = True
 
     def run(self):
         self.into.append(self.incon)
         while not self.is_shutdown:
-            inrlist = self.into
-            print "selecting", inrlist
+            sleep(.01)
 
-            rready, wready, xready = select(inrlist, [], [])
+            self.inrlist = self.into
+            print "selecting"
+            rready, wready, xready = select(self.inrlist, [], [], 5)
             print "done selecting"
             for self.inc in rready:
                 print "running rready"
@@ -79,48 +56,26 @@ class CollectAllProxy(Thread):
                 if self.incon == self.inc:
                     print "begin accept"
                     (clientsocket, addr) = self.inc.accept()
-                    print "end accept"
-                    print "recv from clientsocket"
-                    content = clientsocket.recv(5)
-                    new_content = True
-                    while not self.is_shutdown and new_content:
-                        print "client recv"
-                        print clientsocket
-                        rr, wr, xr = select([clientsocket], [], [], 5)
-                        try:
-                            new_content = rr[0].recv(5000)
-                        except:
-                            print "shutting down into"
-                            self.into[0].shutdown(socket.SHUT_RDWR)
-                            self.into[0].close()
-                            #self.inc.shutdown(socket.SHUT_RDWR)
-                            #self.inc.close()
+                    self.handle_accept(clientsocket, addr)
 
-                        print "client end recv"
-                        print new_content
-                        if not new_content:
-                            break
-                        content += new_content
-                    print content
-                    print "Closing"
-                    #clientsocket.shutdown(socket.SHUT_RDWR)
-                    clientsocket.close()
-                    print "done recv clientsocket"
-                    break
+    def handle_accept(self, clientsocket, addr):
+        # set low so we have to iter over recv
+        bufsize = 5
+        eof_re = re.compile("\r\n\r\n")
 
-                continue
-                incomming_content = ''
-                cur_content = self.inc.recv(1024)
-                while cur_content:
-                    print "cur content"
-                    incomming_content += cur_content
-                    cur_content = self.c.recv(1024)
+        content = ""
+        recved = clientsocket.recv(bufsize)
+        while recved:
+            print "*%s*" % recved
+            content += recved
+            if "Connection: close" in content and eof_re.search(content):
+                break
+            recved = clientsocket.recv(bufsize)
 
-                print "================= incomming"
-                print incomming_content
-                print "================= incomming"
+        clientsocket.close()
+        self.inrlist.remove(self.inc)
 
-        print "Nothing Ready"
+        print content
 
 if __name__ == '__main__':
     cap = CollectAllProxy(

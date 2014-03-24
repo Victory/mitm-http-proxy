@@ -10,3 +10,4 @@ before_install:
   - "sh -e /etc/init.d/xvfb start"
 
 script: python tests/talk-talk-test.py
+script: python tests/test-hunky.py
