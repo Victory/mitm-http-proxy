@@ -9,5 +9,4 @@ before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
 
-script: python tests/talk-talk-test.py
-script: python tests/test-hunky.py
+script: python tests/run-tests.py

@@ -38,17 +38,14 @@ class CollectAllProxy(Thread):
 
     def shutdown(self):
         print "shutting down"
-        self.incon.close()
         self.is_shutdown = True
 
     def run(self):
         self.into.append(self.incon)
         while not self.is_shutdown:
-            sleep(.01)
-
-            self.inrlist = self.into
+            sleep(.1)
             print "selecting"
-            rready, wready, xready = select(self.inrlist, [], [], 5)
+            rready, wready, xready = select(self.into, [], [], 1)
             print "done selecting"
             for self.inc in rready:
                 print "running rready"
@@ -57,6 +54,7 @@ class CollectAllProxy(Thread):
                     print "begin accept"
                     (clientsocket, addr) = self.inc.accept()
                     self.handle_accept(clientsocket, addr)
+        self.incon.close()
 
     def handle_accept(self, clientsocket, addr):
         # set low so we have to iter over recv
@@ -73,8 +71,6 @@ class CollectAllProxy(Thread):
             recved = clientsocket.recv(bufsize)
 
         clientsocket.close()
-        self.inrlist.remove(self.inc)
-
         print content
 
 if __name__ == '__main__':

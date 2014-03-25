@@ -35,6 +35,14 @@ if __name__ == '__main__':
     except BadStatusLine, e:
         print "got the expected bad response"
 
+    print "Trying Second Request"
+    try:
+        response = urlopen('http://127.0.0.1:8877/another-page')
+        print "Reading..."
+        response.read()
+    except BadStatusLine, e:
+        print "got the second expected bad response"
+
     print "Done reading"
 
     print "Shutting Down"
