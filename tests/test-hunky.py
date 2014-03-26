@@ -4,7 +4,7 @@ sys.path.append(dirname(dirname(realpath(__file__))))
 
 from urllib2 import urlopen
 from CollectAllProxy import CollectAllProxy
-from httplib import BadStatusLine
+#from httplib import BadStatusLine
 from time import sleep
 
 
@@ -17,8 +17,10 @@ def shutdown_thread(t):
 
 
 if __name__ == '__main__':
+
+    inport = "8777"
     cap = CollectAllProxy(
-        '127.0.0.1', 8877,
+        '127.0.0.1', int(inport),
         '127.0.0.1', 8000)
     print "Starting Cap"
     cap.start()
@@ -28,21 +30,9 @@ if __name__ == '__main__':
     print "Done Joining"
     print "Opening"
 
-    try:
-        response = urlopen('http://127.0.0.1:8877')
-        print "Reading..."
-        response.read()
-    except BadStatusLine, e:
-        print "got the expected bad response"
-
-    print "Trying Second Request"
-    try:
-        response = urlopen('http://127.0.0.1:8877/another-page')
-        print "Reading..."
-        response.read()
-    except BadStatusLine, e:
-        print "got the second expected bad response"
-
+    response = urlopen('http://127.0.0.1:' + inport)
+    print "from server"
+    print response.read()
     print "Done reading"
 
     print "Shutting Down"

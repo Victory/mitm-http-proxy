@@ -70,8 +70,25 @@ class CollectAllProxy(Thread):
                 break
             recved = clientsocket.recv(bufsize)
 
+        self.send_response(clientsocket)
+
         clientsocket.close()
         print content
+
+    def send_response(self, clientsocket):
+        http = """HTTP/1.1 200 Ok"
+Accept-Ranges: bytes
+Cache-Control: max-age=604800
+Date: Wed, 26 Mar 2014 21:44:43 GMT
+Etag: "359670651"
+Expires: Wed, 02 Apr 2014 21:44:43 GMT
+Last-Modified: Fri, 09 Aug 2013 23:54:35 GMT
+"""
+        http += "\r\n\r\n"
+
+        http += "<html><body><p>The Page</p></body></html>"
+
+        clientsocket.send(http)
 
 if __name__ == '__main__':
     cap = CollectAllProxy(
