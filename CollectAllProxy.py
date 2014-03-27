@@ -58,7 +58,7 @@ class CollectAllProxy(Thread):
 
     def handle_accept(self, clientsocket, addr):
         # set low so we have to iter over recv
-        bufsize = 5
+        bufsize = 50
         eof_re = re.compile("\r\n\r\n")
 
         content = ""
@@ -66,9 +66,10 @@ class CollectAllProxy(Thread):
         while recved:
             print "*%s*" % recved
             content += recved
-            if "Connection: close" in content and eof_re.search(content):
+            if eof_re.search(content):
                 break
             recved = clientsocket.recv(bufsize)
+            print "---\nCNT:", content, ":TNC\n----\n"
 
         self.send_response(clientsocket)
 
