@@ -31,14 +31,14 @@ if __name__ == '__main__':
     print "Opening"
 
     response = urlopen('http://127.0.0.1:' + inport)
-    print "from server"
+    print "**From server**"
     print response.read()
-    print "Done reading"
+    print "**Done reading**"
 
-    response = urlopen('http://127.0.0.1:' + inport)
-    print "from server 2"
-    print response.read()
-    print "Done reading 2"
+    # response = urlopen('http://127.0.0.1:' + inport)
+    # print "from server 2"
+    # print response.read()
+    # print "Done reading 2"
 
     print "Shutting Down"
     shutdown_thread(cap)

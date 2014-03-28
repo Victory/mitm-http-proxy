@@ -61,35 +61,56 @@ class CollectAllProxy(Thread):
         bufsize = 50
         eof_re = re.compile("\r\n\r\n")
 
-        content = ""
+        message = ""
         recved = clientsocket.recv(bufsize)
         while recved:
             print "*%s*" % recved
-            content += recved
-            if eof_re.search(content):
+            message += recved
+            if eof_re.search(message):
                 break
             recved = clientsocket.recv(bufsize)
-            print "---\nCNT:", content, ":TNC\n----\n"
+            print "---\nCNT:", message, ":TNC\n----\n"
 
-        self.send_response(clientsocket)
+        reply = self.forward_message(clientsocket, message)
+
+        self.send_response(clientsocket, reply)
 
         clientsocket.close()
-        print content
 
-    def send_response(self, clientsocket):
-        http = """HTTP/1.1 200 Ok"
-Accept-Ranges: bytes
-Cache-Control: max-age=604800
-Date: Wed, 26 Mar 2014 21:44:43 GMT
-Etag: "359670651"
-Expires: Wed, 02 Apr 2014 21:44:43 GMT
-Last-Modified: Fri, 09 Aug 2013 23:54:35 GMT
-"""
-        http += "\r\n\r\n"
+    def forward_message(self, clientsocket, message):
+        out = socket.socket(
+            socket.AF_INET,
+            socket.SOCK_STREAM)
 
-        http += "<html><body><p>The Page</p></body></html>"
+        out.connect((self.outhost, self.outport))
 
+        out.send(message)
+
+        reply = ""
+        newContent = True
+        buffsize = 50
+        while newContent:
+            sleep(.01)
+            newContent = out.recv(buffsize)
+            if not newContent:
+                break
+            reply += newContent
+
+        print "\nThe Reply:\n"
+        print reply
+        print "\n---end reply---\n"
+
+        reply = reply.replace("Content-Length: 19", "Content-Length: 30")
+        reply += "\nINJECTED!\n"
+
+        return reply
+
+    def send_response(self, clientsocket, http):
+        print "\n--- ready to send ---\n"
+        print http
+        print "\n--- done sending ---\n"
         clientsocket.send(http)
+
 
 if __name__ == '__main__':
     cap = CollectAllProxy(
