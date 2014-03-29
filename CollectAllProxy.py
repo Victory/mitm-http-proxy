@@ -100,10 +100,13 @@ class CollectAllProxy(Thread):
         print reply
         print "\n---end reply---\n"
 
-        reply = reply.replace("Content-Length: 19", "Content-Length: 30")
+        reply = reply.replace("Content-Length: 130", "Content-Length: 141")
         reply += "\nINJECTED!\n"
 
         return reply
+
+    def adjust_content_length(self, reply):
+        pass
 
     def send_response(self, clientsocket, http):
         print "\n--- ready to send ---\n"
