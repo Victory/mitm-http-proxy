@@ -8,7 +8,7 @@ import os
 
 from threading import Thread
 from urllib2 import urlopen
-from CollectAllProxy import CollectAllProxy
+from MitmHttpProxy import MitmHttpProxy
 from time import sleep
 
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     httpd = Httpd()
     httpd.start()
 
-    cap = CollectAllProxy(
+    cap = MitmHttpProxy(
         '127.0.0.1', int(inport),
         '127.0.0.1', int(http_port))
     print "Starting Cap"
