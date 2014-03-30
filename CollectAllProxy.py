@@ -11,10 +11,18 @@ from httplib import HTTPResponse
 
 class StringySocket(StringIO):
     def makefile(self, *args, **kw):
+        """
+        Used to mock set 'rb' flags etc...
+        """
         return self
 
 
 class StringyHttpResponse(object):
+    """
+    The last thing we need is a nother socket to deal with, lets deal
+    with the reply as a string
+    """
+
     def __init__(self, content):
         ss = StringySocket(content)
         response = HTTPResponse(ss)
@@ -27,6 +35,11 @@ class StringyHttpResponse(object):
 
 
 class CollectAllProxy(Thread):
+    """
+    Collects all of an incoming request, before modifying content and
+    forwarding
+    """
+
     into = []
     outof = []
     inchannel = {}
