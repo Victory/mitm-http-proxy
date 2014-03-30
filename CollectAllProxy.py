@@ -5,6 +5,26 @@ from time import sleep
 from select import select
 from threading import Thread
 
+from StringIO import StringIO
+from httplib import HTTPResponse
+
+
+class StringySocket(StringIO):
+    def makefile(self, *args, **kw):
+        return self
+
+
+class StringyHttpResponse(object):
+    def __init__(self, content):
+        ss = StringySocket(content)
+        response = HTTPResponse(ss)
+        response.begin()
+
+        self.response = response
+
+    def getheaders(self):
+        return self.response.getheaders()
+
 
 class CollectAllProxy(Thread):
     into = []
@@ -69,13 +89,18 @@ class CollectAllProxy(Thread):
             if eof_re.search(message):
                 break
             recved = clientsocket.recv(bufsize)
-            print "---\nCNT:", message, ":TNC\n----\n"
 
         reply = self.forward_message(clientsocket, message)
 
         self.send_response(clientsocket, reply)
 
         clientsocket.close()
+
+    def inject_header(self, pageparts):
+        pass
+
+    def inject_body(self, pageparts):
+        pass
 
     def forward_message(self, clientsocket, message):
         out = socket.socket(
@@ -99,6 +124,8 @@ class CollectAllProxy(Thread):
         reply += "\nINJECTED!\n"
         reply = self.adjust_content_length(reply)
 
+        response = StringyHttpResponse(reply)
+        print response.getheaders()
         print "\nThe Reply:\n"
         print reply
         print "\n---end reply---\n"
