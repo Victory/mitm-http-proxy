@@ -13,11 +13,15 @@ from time import sleep
 
 
 def shutdown_thread(t):
-    print "shutting down"
+    print "shutting down thread"
     t.shutdown()
     while t.isAlive():
         sleep(.1)
-    print "done shutting down"
+    print "done shutting down thread"
+
+
+class ReusableTCP(SocketServer.TCPServer):
+    allow_reuse_address = True
 
 
 class Httpd(Thread):
@@ -26,17 +30,19 @@ class Httpd(Thread):
     def __init__(self):
         super(Httpd, self).__init__()
 
-        PORT = 8000
+        self.PORT = 8000
         Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-        self.httpd = SocketServer.TCPServer(("", PORT), Handler)
-        print "serving at port", PORT
+        self.httpd = ReusableTCP(("", self.PORT), Handler)
+        self.httpd.timeout = 3
+        print "serving at port", self.PORT
 
     def run(self):
         self.httpd.serve_forever()
 
     def shutdown(self):
+        print "Shutting down httpd"
         self.httpd.shutdown()
-
+        print "Done with httpd shutdown"
 
 if __name__ == '__main__':
     os.chdir(dirname(dirname(realpath(__file__))) + "/html")
