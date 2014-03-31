@@ -33,6 +33,9 @@ class StringyHttpResponse(object):
     def getheaders(self):
         return self.response.getheaders()
 
+    def read(self):
+        return self.response.read()
+
 
 class CollectAllProxy(Thread):
     """
@@ -139,9 +142,10 @@ class CollectAllProxy(Thread):
 
         response = StringyHttpResponse(reply)
         print response.getheaders()
-        print "\nThe Reply:\n"
-        print reply
-        print "\n---end reply---\n"
+
+        print "\nThe body:\n"
+        print response.read()
+        print "\n---end body ---\n"
 
         return reply
 
