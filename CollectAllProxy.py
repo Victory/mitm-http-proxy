@@ -36,7 +36,7 @@ class StringyHttpResponse(object):
         return len(self.get_body())
 
     def get_header_string(self, code=200):
-        str_headers = [h[0] + ": " + h[1] for h in self.get_headers()]
+        str_headers = [h[0] + ": " + str(h[1]) for h in self.get_headers()]
         if code == 200:
             status_line = "HTTP/1.0 200 OK\r\n"
 
@@ -177,7 +177,7 @@ class CollectAllProxy(Thread):
 
         reply += "\nINJECTED!\n"
         response = StringyHttpResponse(reply)
-        print response.getheaders()
+        print response.get_headers()
 
         reply = self.adjust_content_length(response)
 
@@ -185,11 +185,12 @@ class CollectAllProxy(Thread):
         print response.get_body()
         print "\n---end body ---\n"
 
-        return reply
+        return response.build_response()
 
     def adjust_content_length(self, response):
         content_length = response.get_content_length()
         response.set_header("content-length", content_length)
+        return response
 
     def send_response(self, clientsocket, http):
         print "\n--- ready to send ---\n"
