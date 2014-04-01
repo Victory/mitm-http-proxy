@@ -22,6 +22,8 @@ class StringyHttpResponse(object):
     The last thing we need is a nother socket to deal with, lets deal
     with the reply as a string
     """
+    body = None
+    headers = None
 
     def __init__(self, content):
         ss = StringySocket(content)
@@ -30,11 +32,47 @@ class StringyHttpResponse(object):
 
         self.response = response
 
-    def getheaders(self):
-        return self.response.getheaders()
+    def get_content_length(self):
+        return len(self.get_body())
 
-    def read(self):
-        return self.response.read()
+    def get_header_string(self, code=200):
+        str_headers = [h[0] + ": " + h[1] for h in self.get_headers()]
+        if code == 200:
+            status_line = "HTTP/1.0 200 OK\r\n"
+
+        return status_line + "\r\n".join(str_headers)
+
+    def set_header(self, header_name, value):
+        header = header_name.lower()
+        val = (header, value)
+        for ii, h in enumerate(self.get_headers()):
+            if h[0] == header:
+                self.headers[ii] = val
+                break
+
+        self.headers.append(val)
+
+        return self.headers
+
+    def get_header(self, header_name):
+        header = header_name.lower()
+        for h in self.get_headers():
+            if h[0].lower() == header:
+                return h
+        return None
+
+    def get_headers(self):
+        if not self.headers:
+            self.headers = self.response.getheaders()
+        return self.headers
+
+    def get_body(self):
+        if not self.body:
+            self.body = self.response.read()
+        return self.body
+
+    def build_response(self):
+        return self.get_header_string() + "\r\n" + self.get_body()
 
 
 class CollectAllProxy(Thread):
@@ -138,30 +176,20 @@ class CollectAllProxy(Thread):
             reply += newContent
 
         reply += "\nINJECTED!\n"
-        reply = self.adjust_content_length(reply)
-
         response = StringyHttpResponse(reply)
         print response.getheaders()
 
+        reply = self.adjust_content_length(response)
+
         print "\nThe body:\n"
-        print response.read()
+        print response.get_body()
         print "\n---end body ---\n"
 
         return reply
 
-    def adjust_content_length(self, reply):
-
-        bits = reply.split("\r\n\r\n")
-
-        if len(bits) == 1:
-            return reply
-
-        new_content_length = "Content-Length: " + str(len(bits[1]))
-
-        clre = re.compile(r"Content-Length: .*", re.I)
-        bits[0] = clre.sub(new_content_length, bits[0])
-
-        return "\r\n\r\n".join(bits)
+    def adjust_content_length(self, response):
+        content_length = response.get_content_length()
+        response.set_header("content-length", content_length)
 
     def send_response(self, clientsocket, http):
         print "\n--- ready to send ---\n"
