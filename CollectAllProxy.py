@@ -150,11 +150,11 @@ class CollectAllProxy(Thread):
 
         clientsocket.close()
 
-    def inject_header(self, pageparts):
-        pass
+    def inject_headers(self, response):
+        return response
 
-    def inject_body(self, pageparts):
-        pass
+    def inject_body(self, response):
+        return response
 
     def forward_message(self, clientsocket, message):
         out = socket.socket(
@@ -175,15 +175,15 @@ class CollectAllProxy(Thread):
                 break
             reply += newContent
 
-        reply += "\nINJECTED!\n"
         response = StringyHttpResponse(reply)
-        print response.get_headers()
 
-        reply = self.adjust_content_length(response)
+        response = self.inject_body(response)
+        response = self.inject_headers(response)
+        response = self.adjust_content_length(response)
 
-        print "\nThe body:\n"
-        print response.get_body()
-        print "\n---end body ---\n"
+        print "\nbuild_response:\n"
+        print response.build_response()
+        print "\n---end build_response ---\n"
 
         return response.build_response()
 
