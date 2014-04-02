@@ -51,5 +51,11 @@ Last-Modified: Sat, 29 Mar 2014 17:00:03 GMT
         expected = 'content-length: 150'
         self.assertTrue(expected in header_string)
 
+    def test_set_header(self):
+        expected = ('content-length', '140')
+        self.response.set_header('content-length', '140')
+        actual = self.response.get_header('content-length')
+        self.assertTrue(expected == actual)
+
 if __name__ == '__main__':
     unittest.main()
