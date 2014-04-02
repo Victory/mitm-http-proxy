@@ -57,5 +57,14 @@ Last-Modified: Sat, 29 Mar 2014 17:00:03 GMT
         actual = self.response.get_header('content-length')
         self.assertTrue(expected == actual)
 
+    def test_inject_body(self):
+        def inject_body(body):
+            body += "INJECTED!"
+            return body
+
+        self.response.inject_body(inject_body)
+        body = self.response.get_body()
+        self.assertTrue("INJECTED!" in body)
+
 if __name__ == '__main__':
     unittest.main()

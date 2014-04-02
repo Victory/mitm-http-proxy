@@ -71,6 +71,10 @@ class StringyHttpResponse(object):
             self.body = self.response.read()
         return self.body
 
+    def inject_body(self, callback):
+        self.body = callback(self.get_body())
+        return self.body
+
     def build_response(self):
         return self.get_header_string() + "\r\n" + self.get_body()
 

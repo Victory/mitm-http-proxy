@@ -80,5 +80,5 @@ if __name__ == '__main__':
     shutdown_thread(cap)
     shutdown_thread(httpd)
 
-    assert response1.find("INJECTED!")
-    assert response2.find("INJECTED!")
+    assert "INJECTED!" in response1
+    assert "INJECTED!" in response2
