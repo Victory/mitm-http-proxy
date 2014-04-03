@@ -76,7 +76,7 @@ class StringyHttpResponse(object):
         return self.body
 
     def build_response(self):
-        return self.get_header_string() + "\r\n" + self.get_body()
+        return self.get_header_string() + "\r\n\r\n" + self.get_body()
 
 
 class CollectAllProxy(Thread):
@@ -86,9 +86,6 @@ class CollectAllProxy(Thread):
     """
 
     into = []
-    outof = []
-    inchannel = {}
-    outchannel = {}
     is_shutdown = False
 
     def __init__(self,

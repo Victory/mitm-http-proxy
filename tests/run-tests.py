@@ -7,5 +7,7 @@ errs += call(['python', 'tests/test-hunky.py'])
 print "Errors: ", errs
 errs += call(['python', 'tests/stringy-http-response-tests.py'])
 print "Errors: ", errs
+errs += call(['python', 'tests/selenium-test.py'])
+print "Errors: ", errs
 
 exit(errs)
