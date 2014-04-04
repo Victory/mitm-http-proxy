@@ -65,6 +65,15 @@ if __name__ == '__main__':
     cap.join(2)
 
     driver = webdriver.Firefox()
+
+    def ijb(body):
+        body = body.replace(
+            "<body>",
+            "<body><p id='injected'>INJECTED!</p>")
+        return body
+
+    cap.inject_body_function = ijb
+
     driver.get("http://127.0.0.1:" + inport + "/html/index.html")
     sleep(5)
 

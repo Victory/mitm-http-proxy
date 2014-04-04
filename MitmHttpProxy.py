@@ -2,13 +2,13 @@ from CollectAllProxy import CollectAllProxy
 
 
 class MitmHttpProxy(CollectAllProxy):
+    inject_body_function = None
 
     def inject_body(self, response):
-        def inject_body(body):
-            body = body.replace(
-                "<body>",
-                "<body><p id='injected'>INJECTED!</p>")
-            return body
+        ijb = self.inject_body_function
+        if not hasattr(ijb, '__call__'):
+            print "NOT CALLABLE"
+            return response
 
-        response.inject_body(inject_body)
+        response.inject_body(ijb)
         return response
