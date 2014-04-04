@@ -4,11 +4,7 @@ sys.path.append(dirname(dirname(realpath(__file__))))
 
 from time import sleep
 
-import SimpleHTTPServer
-import SocketServer
-
 from selenium import webdriver
-from threading import Thread
 
 from MitmHttpProxy import MitmHttpProxy, Httpd
 

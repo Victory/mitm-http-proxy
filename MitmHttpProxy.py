@@ -43,7 +43,7 @@ class MitmHttpProxy(CollectAllProxy):
             return response
 
         if hasattr(ijc, '__call__'):
-            if not inject_body_condition_function(response):
+            if not self.inject_body_condition_function(response):
                 return response
 
         response.inject_body(ijb)
