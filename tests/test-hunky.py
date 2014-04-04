@@ -64,6 +64,12 @@ if __name__ == '__main__':
     print "Done Joining"
     print "Opening"
 
+    def ijb(body):
+        body += "INJECTED!"
+        return body
+    cap.inject_body_function = ijb
+
+
     response = urlopen('http://127.0.0.1:' + inport)
     print "**From server**"
     response1 = response.read()

@@ -10,7 +10,7 @@ import SocketServer
 from selenium import webdriver
 from threading import Thread
 
-from MitmHttpProxy import MitmHttpProxy
+from MitmHttpProxy import MitmHttpProxy, Httpd
 
 
 BASEDIR = dirname(dirname(realpath(__file__)))
@@ -24,30 +24,6 @@ def shutdown_thread(t):
         sleep(.1)
     print "done shutting down thread"
 
-
-class ReusableTCP(SocketServer.TCPServer):
-    allow_reuse_address = True
-
-
-class Httpd(Thread):
-    httpd = None
-
-    def __init__(self):
-        super(Httpd, self).__init__()
-
-        self.PORT = 8000
-        Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-        self.httpd = ReusableTCP(("", self.PORT), Handler)
-        self.httpd.timeout = 3
-        print "serving at port", self.PORT
-
-    def run(self):
-        self.httpd.serve_forever()
-
-    def shutdown(self):
-        print "Shutting down httpd"
-        self.httpd.shutdown()
-        print "Done with httpd shutdown"
 
 if __name__ == '__main__':
 
