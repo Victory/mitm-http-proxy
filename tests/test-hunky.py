@@ -6,10 +6,10 @@ import SimpleHTTPServer
 import SocketServer
 import os
 
+from time import sleep
 from threading import Thread
 from urllib2 import urlopen
-from MitmHttpProxy import MitmHttpProxy
-from time import sleep
+from MitmHttpProxy import MitmHttpProxy, Httpd
 
 
 def shutdown_thread(t):
@@ -19,30 +19,6 @@ def shutdown_thread(t):
         sleep(.1)
     print "done shutting down thread"
 
-
-class ReusableTCP(SocketServer.TCPServer):
-    allow_reuse_address = True
-
-
-class Httpd(Thread):
-    httpd = None
-
-    def __init__(self):
-        super(Httpd, self).__init__()
-
-        self.PORT = 8000
-        Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-        self.httpd = ReusableTCP(("", self.PORT), Handler)
-        self.httpd.timeout = 3
-        print "serving at port", self.PORT
-
-    def run(self):
-        self.httpd.serve_forever()
-
-    def shutdown(self):
-        print "Shutting down httpd"
-        self.httpd.shutdown()
-        print "Done with httpd shutdown"
 
 if __name__ == '__main__':
     os.chdir(dirname(dirname(realpath(__file__))) + "/html")
