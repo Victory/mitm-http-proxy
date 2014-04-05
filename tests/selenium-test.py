@@ -10,10 +10,6 @@ from selenium import webdriver
 from MitmHttpProxy import MitmHttpProxy, Httpd, shutdown_thread
 
 
-BASEDIR = dirname(dirname(realpath(__file__)))
-HOME = "file://" + BASEDIR + "/html"
-
-
 if __name__ == '__main__':
     os.chdir(dirname(dirname(realpath(__file__))) + "/html")
 
