@@ -4,7 +4,6 @@ sys.path.append(dirname(dirname(realpath(__file__))))
 
 import os
 
-from time import sleep
 from urllib2 import urlopen
 from MitmHttpProxy import MitmHttpProxy, Httpd, shutdown_thread
 
