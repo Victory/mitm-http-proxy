@@ -1,5 +1,6 @@
 mitm-http-proxy
 ===============
-[![Build Status](https://travis-ci.org/mitm-http-proxy.png?branch=master)](https://travis-ci.org/Victory/mitm-http-proxy)
+[![Build Status](https://travis-ci.org/Victory/mitm-http-proxy.svg?branch=master)](https://travis-ci.org/Victory/mitm-http-proxy)
 
-Used to Inject window.onerror code for functional testing via selenium
+Used to inject `<script>window.onerror = function() {}</script>` code
+for functional and live testing of javascript errors.
