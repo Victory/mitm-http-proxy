@@ -1,4 +1,5 @@
 import sys
+import os
 from os.path import dirname, realpath
 sys.path.append(dirname(dirname(realpath(__file__))))
 
@@ -22,6 +23,7 @@ def shutdown_thread(t):
 
 
 if __name__ == '__main__':
+    os.chdir(dirname(dirname(realpath(__file__))) + "/html")
 
     inport = "8777"
     http_port = "8000"
@@ -46,7 +48,7 @@ if __name__ == '__main__':
 
     cap.inject_body_function = ijb
 
-    driver.get("http://127.0.0.1:" + inport + "/html/index.html")
+    driver.get("http://127.0.0.1:" + inport + "/index.html")
     sleep(5)
 
     try:
