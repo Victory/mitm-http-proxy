@@ -2,22 +2,11 @@ import sys
 from os.path import dirname, realpath
 sys.path.append(dirname(dirname(realpath(__file__))))
 
-import SimpleHTTPServer
-import SocketServer
 import os
 
 from time import sleep
-from threading import Thread
 from urllib2 import urlopen
-from MitmHttpProxy import MitmHttpProxy, Httpd
-
-
-def shutdown_thread(t):
-    print "shutting down thread"
-    t.shutdown()
-    while t.isAlive():
-        sleep(.1)
-    print "done shutting down thread"
+from MitmHttpProxy import MitmHttpProxy, Httpd, shutdown_thread
 
 
 if __name__ == '__main__':

@@ -7,19 +7,11 @@ from time import sleep
 
 from selenium import webdriver
 
-from MitmHttpProxy import MitmHttpProxy, Httpd
+from MitmHttpProxy import MitmHttpProxy, Httpd, shutdown_thread
 
 
 BASEDIR = dirname(dirname(realpath(__file__)))
 HOME = "file://" + BASEDIR + "/html"
-
-
-def shutdown_thread(t):
-    print "shutting down thread"
-    t.shutdown()
-    while t.isAlive():
-        sleep(.1)
-    print "done shutting down thread"
 
 
 if __name__ == '__main__':

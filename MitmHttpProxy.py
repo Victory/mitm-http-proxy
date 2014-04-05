@@ -2,8 +2,17 @@ import SocketServer
 import SimpleHTTPServer
 
 from threading import Thread
+from time import sleep
 
 from CollectAllProxy import CollectAllProxy
+
+
+def shutdown_thread(t):
+    print "shutting down thread"
+    t.shutdown()
+    while t.isAlive():
+        sleep(.1)
+    print "done shutting down thread"
 
 
 class ReusableTCP(SocketServer.TCPServer):
