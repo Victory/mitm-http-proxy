@@ -48,7 +48,15 @@ if __name__ == '__main__':
             "<head>" + on_error_handler)
         return body
 
+    def ijbc(response):
+        header = response.get_header('content-type')
+        if not header:
+            return None
+
+        return header[1] == 'text/html'
+
     cap.inject_body_function = ijb
+    cap.inject_body_condition_function = ijbc
 
     driver.get("http://127.0.0.1:" + inport + "/has-javascript-error.html")
     sleep(5)
