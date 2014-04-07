@@ -1,6 +1,8 @@
 import socket
 import re
 
+import logging as log
+
 from time import sleep
 from select import select
 from threading import Thread
@@ -112,21 +114,21 @@ class CollectAllProxy(Thread):
         self.incon.listen(10)
 
     def shutdown(self):
-        print "shutting down"
+        log.info("shutting down")
         self.is_shutdown = True
 
     def run(self):
         self.into.append(self.incon)
         while not self.is_shutdown:
-            sleep(.1)
-            print "selecting"
+            sleep(.01)
+            log.debug("selecting")
             rready, wready, xready = select(self.into, [], [], 1)
-            print "done selecting"
+            log.debug("done selecting")
             for self.inc in rready:
-                print "running rready"
+                log.debug("running rready")
 
                 if self.incon == self.inc:
-                    print "begin accept"
+                    log.debug("begin accept")
                     (clientsocket, addr) = self.inc.accept()
                     self.handle_accept(clientsocket, addr)
         self.incon.close()
@@ -139,7 +141,6 @@ class CollectAllProxy(Thread):
         message = ""
         recved = clientsocket.recv(bufsize)
         while recved:
-            print "*%s*" % recved
             message += recved
             if eof_re.search(message):
                 break
@@ -182,10 +183,6 @@ class CollectAllProxy(Thread):
         response = self.inject_headers(response)
         response = self.adjust_content_length(response)
 
-        print "\nbuild_response:\n"
-        print response.build_response()
-        print "\n---end build_response ---\n"
-
         return response.build_response()
 
     def adjust_content_length(self, response):
@@ -194,9 +191,9 @@ class CollectAllProxy(Thread):
         return response
 
     def send_response(self, clientsocket, http):
-        print "\n--- ready to send ---\n"
-        print http
-        print "\n--- done sending ---\n"
+        log.debug("\n--- ready to send ---\n")
+        log.debug(http)
+        log.debug("\n--- done sending ---\n")
         clientsocket.send(http)
 
 

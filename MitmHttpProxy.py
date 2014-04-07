@@ -1,6 +1,8 @@
 import SocketServer
 import SimpleHTTPServer
 
+import logging as log
+
 from threading import Thread
 from time import sleep
 
@@ -8,11 +10,11 @@ from CollectAllProxy import CollectAllProxy
 
 
 def shutdown_thread(t):
-    print "shutting down thread"
+    log.info("shutting down thread")
     t.shutdown()
     while t.isAlive():
         sleep(.1)
-    print "done shutting down thread"
+    log.info("done shutting down thread")
 
 
 class ReusableTCP(SocketServer.TCPServer):
@@ -29,15 +31,15 @@ class Httpd(Thread):
         Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
         self.httpd = ReusableTCP(("", self.PORT), Handler)
         self.httpd.timeout = 3
-        print "serving at port", self.PORT
+        log.info("serving at port %s" % self.PORT)
 
     def run(self):
         self.httpd.serve_forever()
 
     def shutdown(self):
-        print "Shutting down httpd"
+        log.debug("Shutting down httpd")
         self.httpd.shutdown()
-        print "Done with httpd shutdown"
+        log.debug("Done with httpd shutdown")
 
 
 class MitmHttpProxy(CollectAllProxy):
